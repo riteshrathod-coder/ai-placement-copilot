@@ -11,6 +11,13 @@ interface ResumeData {
   experience: string;
   summary?: string;
   rawText?: string;
+  authenticityFeedback?: string;
+  suggestedRoles?: string[];
+  learningResources?: {
+    title: string;
+    url: string;
+    platform: string;
+  }[];
   scores?: {
     fit: number;
     authenticity: number;

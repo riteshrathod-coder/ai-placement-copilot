@@ -3,7 +3,7 @@ import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import { motion } from 'motion/react';
 import { Mail, Lock, User, ArrowRight, Sparkles, ShieldCheck, Briefcase, Check, AlertCircle } from 'lucide-react';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, signOut } from 'firebase/auth';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 import { useEffect } from 'react';
 
@@ -18,39 +18,14 @@ export default function Auth() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [role, setRole] = useState<'student' | 'hr'>(location.state?.role || 'student');
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [verificationSent, setVerificationSent] = useState(false);
-  const [isResending, setIsResending] = useState(false);
+  const [error, setError] = useState<React.ReactNode | null>(null);
 
   useEffect(() => {
-    if (user && userRole && user.emailVerified) {
+    if (user && userRole) {
       navigate(userRole === 'student' ? '/student' : '/hr', { replace: true });
-    } else if (user && !user.emailVerified) {
-      setVerificationSent(true);
     }
   }, [user, userRole, navigate]);
   
-  const handleResendVerification = async () => {
-    if (!auth.currentUser) return;
-    setIsResending(true);
-    setError(null);
-    try {
-      await sendEmailVerification(auth.currentUser, {
-        url: window.location.origin + '/signin',
-      });
-      setVerificationSent(true);
-    } catch (err: any) {
-      console.error(err);
-      if (err.code === 'auth/unauthorized-continue-uri') {
-        setError("This domain is not authorized in Firebase. Please add " + window.location.origin + " to your Firebase Authorized Domains.");
-      } else {
-        setError("Failed to resend verification email. Please try again later.");
-      }
-    } finally {
-      setIsResending(false);
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -64,25 +39,11 @@ export default function Auth() {
     
     try {
       if (isSignUp) {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        try {
-          await sendEmailVerification(userCredential.user, {
-            url: window.location.origin + '/signin',
-          });
-        } catch (emailErr: any) {
-          console.error("Error sending verification email:", emailErr);
-          if (emailErr.code === 'auth/unauthorized-continue-uri') {
-            setError("Account created, but verification email failed: Domain not authorized in Firebase. Please add " + window.location.origin + " to Authorized Domains.");
-          }
-        }
-        // We don't sign out immediately anymore, we let the UI handle the unverified state
-        setVerificationSent(true);
+        await createUserWithEmailAndPassword(auth, email, password);
+        setUserRole(role);
+        navigate(role === 'student' ? '/student' : '/hr');
       } else {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        if (!userCredential.user.emailVerified) {
-          setVerificationSent(true);
-          return;
-        }
+        await signInWithEmailAndPassword(auth, email, password);
         setUserRole(role);
         navigate(role === 'student' ? '/student' : '/hr');
       }
@@ -105,54 +66,6 @@ export default function Auth() {
       setIsLoading(false);
     }
   };
-
-  if (verificationSent) {
-    return (
-      <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="w-full max-w-md"
-        >
-          <div className="bg-white rounded-3xl shadow-xl border border-slate-100 p-8 md:p-10 text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-sage-100 rounded-2xl text-sage-600 mb-6">
-              <Mail size={32} />
-            </div>
-            <h1 className="text-2xl font-display font-bold text-slate-900 mb-4">Verify Your Email</h1>
-            <p className="text-slate-500 mb-8 leading-relaxed">
-              We have sent you a verification email to <span className="font-semibold text-slate-900">{email || auth.currentUser?.email}</span>. 
-              Please verify it and log in.
-            </p>
-            
-            <div className="space-y-3">
-              <button
-                onClick={() => {
-                  signOut(auth);
-                  setVerificationSent(false);
-                  navigate('/signin');
-                }}
-                className="w-full bg-sage-600 text-white py-4 rounded-xl font-semibold hover:bg-sage-700 transition-all shadow-lg shadow-sage-100"
-              >
-                Back to Login
-              </button>
-              
-              <button
-                onClick={handleResendVerification}
-                disabled={isResending}
-                className="w-full bg-white border border-slate-200 text-slate-600 py-4 rounded-xl font-semibold hover:bg-slate-50 transition-all disabled:opacity-50"
-              >
-                {isResending ? 'Sending...' : 'Resend Verification Email'}
-              </button>
-            </div>
-
-            <p className="mt-6 text-xs text-slate-400">
-              Tip: Check your spam folder if you don't see the email.
-            </p>
-          </div>
-        </motion.div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">

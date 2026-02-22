@@ -2,19 +2,48 @@ import { GoogleGenAI, Type } from "@google/genai";
 
 const apiKey = process.env.GEMINI_API_KEY;
 
-export const analyzeResume = async (resumeText: string) => {
+export const analyzeResume = async (input: string | { data: string, mimeType: string }) => {
   if (!apiKey) {
     throw new Error("GEMINI_API_KEY is not set");
   }
 
   const ai = new GoogleGenAI({ apiKey });
   
+  const part = typeof input === 'string' 
+    ? { text: `Analyze the following resume text. 
+    Perform the following:
+    1. Skill Detection: Identify all technical and soft skills.
+    2. Authenticity Check: Identify generic phrases, buzzwords, or AI-generated patterns.
+    3. Job Role Suggestions: Suggest 3-5 job roles that fit this profile.
+    4. Learning Resources: For identified skill gaps or suggested roles, provide 3-5 free learning resource links (e.g., Coursera, YouTube, MDN).
+    5. Scoring: Provide scores (0-100) for Fit, Authenticity, Clarity, Impact, and Relevance.
+    6. Extraction: Extract the full text as 'extractedText'.
+
+    Resume Text:
+    ${input}` }
+    : {
+        inlineData: {
+          data: input.data,
+          mimeType: input.mimeType
+        }
+      };
+
+  const promptPart = typeof input === 'string' 
+    ? null 
+    : { text: `Analyze this resume file. 
+    Perform the following:
+    1. Skill Detection: Identify all technical and soft skills.
+    2. Authenticity Check: Identify generic phrases, buzzwords, or AI-generated patterns.
+    3. Job Role Suggestions: Suggest 3-5 job roles that fit this profile.
+    4. Learning Resources: For identified skill gaps or suggested roles, provide 3-5 free learning resource links (e.g., Coursera, YouTube, MDN).
+    5. Scoring: Provide scores (0-100) for Fit, Authenticity, Clarity, Impact, and Relevance.
+    6. Extraction: Extract the full text as 'extractedText'.` };
+
+  const contents = promptPart ? [part, promptPart] : [part];
+
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
-    contents: `Analyze the following resume text and provide scores (0-100) for Fit, Authenticity, Clarity, Impact, and Relevance. Also provide a brief summary and key skills identified.
-    
-    Resume Text:
-    ${resumeText}`,
+    contents: { parts: contents },
     config: {
       responseMimeType: "application/json",
       responseSchema: {
@@ -36,8 +65,26 @@ export const analyzeResume = async (resumeText: string) => {
             type: Type.ARRAY,
             items: { type: Type.STRING },
           },
+          authenticityFeedback: { type: Type.STRING },
+          suggestedRoles: {
+            type: Type.ARRAY,
+            items: { type: Type.STRING },
+          },
+          learningResources: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                title: { type: Type.STRING },
+                url: { type: Type.STRING },
+                platform: { type: Type.STRING },
+              },
+              required: ["title", "url", "platform"],
+            },
+          },
+          extractedText: { type: Type.STRING },
         },
-        required: ["scores", "summary", "skills"],
+        required: ["scores", "summary", "skills", "authenticityFeedback", "suggestedRoles", "learningResources", "extractedText"],
       },
     },
   });
@@ -59,8 +106,13 @@ export const matchJobWithResume = async (resumeText: string, jobDescription: str
   
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
-    contents: `Compare the following resume against the job description. Provide a match probability (0-100) and a brief explanation of why the candidate is a good fit or what they are missing.
-    
+    contents: `Compare the following resume against the job description. 
+    Perform the following:
+    1. Fit Score Calculation: Calculate a score (0-100) based on matched skills vs required skills.
+    2. Skill Gap Detection: List specific missing skills or certifications.
+    3. Placement Probability: Calculate a weighted probability (0-100) of being hired, considering experience level, skill match, and clarity of the resume.
+    4. Explanation: Provide a brief justification for the scores.
+
     Resume:
     ${resumeText}
     
@@ -71,14 +123,15 @@ export const matchJobWithResume = async (resumeText: string, jobDescription: str
       responseSchema: {
         type: Type.OBJECT,
         properties: {
-          matchProbability: { type: Type.NUMBER },
+          matchProbability: { type: Type.NUMBER, description: "Fit score based on skills" },
+          placementProbability: { type: Type.NUMBER, description: "Weighted hiring probability" },
           explanation: { type: Type.STRING },
           missingSkills: {
             type: Type.ARRAY,
             items: { type: Type.STRING },
           },
         },
-        required: ["matchProbability", "explanation", "missingSkills"],
+        required: ["matchProbability", "placementProbability", "explanation", "missingSkills"],
       },
     },
   });

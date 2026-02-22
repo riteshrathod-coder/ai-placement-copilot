@@ -20,7 +20,7 @@ function ProtectedRoute({ children, allowedRole }: { children: React.ReactNode, 
     );
   }
   
-  if (!user || !userRole || !user.emailVerified) {
+  if (!user || !userRole) {
     return <Navigate to="/signin" replace />;
   }
   

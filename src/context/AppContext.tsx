@@ -9,6 +9,8 @@ interface ResumeData {
   email: string;
   skills: string[];
   experience: string;
+  summary?: string;
+  rawText?: string;
   scores?: {
     fit: number;
     authenticity: number;

@@ -11,9 +11,12 @@ import {
   Target, 
   Layers,
   ChevronRight,
-  Download
+  Download,
+  Send,
+  Briefcase
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, PolarGrid, PolarAngleAxis, Radar, RadarChart } from 'recharts';
+import { analyzeResume, matchJobWithResume } from '../services/geminiService';
 
 const LOADING_STEPS = [
   "Initializing neural parser...",
@@ -24,56 +27,121 @@ const LOADING_STEPS = [
   "Generating career trajectory..."
 ];
 
+const MOCK_JOBS = [
+  {
+    id: 1,
+    title: "Senior Frontend Engineer",
+    company: "LinkedIn",
+    location: "Sunnyvale, CA (Remote)",
+    description: "We are looking for a Senior Frontend Engineer with expertise in React, TypeScript, and high-performance web applications. You will be responsible for building intuitive user interfaces for millions of users.",
+    salary: "$160k - $220k",
+    logo: "https://picsum.photos/seed/linkedin/100/100"
+  },
+  {
+    id: 2,
+    title: "Full Stack Developer",
+    company: "Google",
+    location: "Mountain View, CA",
+    description: "Google is seeking a Full Stack Developer to join our Cloud team. Experience with Node.js, Go, and distributed systems is highly desirable. Help us build the next generation of cloud infrastructure.",
+    salary: "$150k - $210k",
+    logo: "https://picsum.photos/seed/google/100/100"
+  },
+  {
+    id: 3,
+    title: "AI Research Engineer",
+    company: "OpenAI",
+    location: "San Francisco, CA",
+    description: "Join OpenAI to work on cutting-edge generative models. We need engineers who can bridge the gap between research and production. Strong background in Python and PyTorch required.",
+    salary: "$200k - $300k",
+    logo: "https://picsum.photos/seed/openai/100/100"
+  }
+];
+
 export default function StudentDashboard() {
-  const { resumeData, setResumeData } = useAppContext();
+  const { user, resumeData, setResumeData } = useAppContext();
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [loadingStep, setLoadingStep] = useState(0);
+  const [resumeText, setResumeText] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'analysis' | 'jobs'>('analysis');
+  const [selectedJob, setSelectedJob] = useState<any>(null);
+  const [matchResult, setMatchResult] = useState<any>(null);
+  const [isMatching, setIsMatching] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [locationQuery, setLocationQuery] = useState('');
+  const [companyQuery, setCompanyQuery] = useState('');
 
-  const handleUpload = () => {
+  const handleAnalyze = async () => {
+    if (!resumeText.trim()) return;
+    
     setIsUploading(true);
     setUploadProgress(0);
     setLoadingStep(0);
+    setError(null);
+
+    // Start progress simulation
+    const progressInterval = setInterval(() => {
+      setUploadProgress(prev => (prev < 90 ? prev + 1 : prev));
+    }, 100);
+
+    const stepInterval = setInterval(() => {
+      setLoadingStep(prev => (prev < LOADING_STEPS.length - 1 ? prev + 1 : prev));
+    }, 1500);
+
+    try {
+      const result = await analyzeResume(resumeText);
+      
+      setUploadProgress(100);
+      setLoadingStep(LOADING_STEPS.length - 1);
+      
+      setTimeout(() => {
+        setResumeData({
+          name: user?.displayName || user?.email?.split('@')[0] || "Candidate",
+          email: user?.email || "candidate@example.com",
+          skills: result.skills,
+          experience: "Analyzed via AI Placement Copilot",
+          summary: result.summary,
+          scores: result.scores,
+          rawText: resumeText // Store raw text for job matching
+        });
+        setIsUploading(false);
+      }, 1000);
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || "Failed to analyze resume. Please try again.");
+      setIsUploading(false);
+    } finally {
+      clearInterval(progressInterval);
+      clearInterval(stepInterval);
+    }
   };
 
-  useEffect(() => {
-    if (isUploading) {
-      const interval = setInterval(() => {
-        setUploadProgress(prev => {
-          if (prev >= 100) {
-            clearInterval(interval);
-            setTimeout(() => {
-              setResumeData({
-                name: "Alex Rivera",
-                email: "alex.rivera@example.com",
-                skills: ["React", "TypeScript", "Node.js", "System Design", "Product Strategy"],
-                experience: "Senior Software Engineer with 6 years of experience in fintech and SaaS.",
-                scores: {
-                  fit: 88,
-                  authenticity: 94,
-                  clarity: 82,
-                  impact: 76,
-                  relevance: 91
-                }
-              });
-              setIsUploading(false);
-            }, 1000);
-            return 100;
-          }
-          return prev + 1;
-        });
-      }, 50);
-
-      const stepInterval = setInterval(() => {
-        setLoadingStep(prev => (prev < LOADING_STEPS.length - 1 ? prev + 1 : prev));
-      }, 1000);
-
-      return () => {
-        clearInterval(interval);
-        clearInterval(stepInterval);
-      };
+  const handleMatchJob = async (job: any) => {
+    if (!resumeData?.rawText) return;
+    
+    setSelectedJob(job);
+    setIsMatching(true);
+    setMatchResult(null);
+    
+    try {
+      const result = await matchJobWithResume(resumeData.rawText, job.description);
+      setMatchResult(result);
+    } catch (err: any) {
+      console.error(err);
+      setError("Failed to match job. Please try again.");
+    } finally {
+      setIsMatching(false);
     }
-  }, [isUploading, setResumeData]);
+  };
+
+  const filteredJobs = MOCK_JOBS.filter(job => {
+    const matchesKeyword = job.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          job.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesLocation = job.location.toLowerCase().includes(locationQuery.toLowerCase());
+    const matchesCompany = job.company.toLowerCase().includes(companyQuery.toLowerCase());
+    return matchesKeyword && matchesLocation && matchesCompany;
+  });
 
   if (isUploading) {
     return (
@@ -132,21 +200,35 @@ export default function StudentDashboard() {
       <div className="max-w-5xl mx-auto px-4 py-12">
         <div className="mb-12">
           <h1 className="text-3xl font-display font-bold text-slate-900 mb-2">Welcome Back</h1>
-          <p className="text-slate-500">Upload your resume to get a comprehensive AI analysis of your career flow.</p>
+          <p className="text-slate-500">Paste your resume text below to get a comprehensive AI analysis of your career flow.</p>
         </div>
 
-        <div 
-          onClick={handleUpload}
-          className="group relative border-2 border-dashed border-slate-200 rounded-3xl p-16 flex flex-col items-center justify-center cursor-pointer hover:border-sage-400 hover:bg-sage-50/30 transition-all duration-500"
-        >
-          <div className="w-20 h-20 bg-sage-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500">
-            <FileUp size={32} className="text-sage-600" />
+        {error && (
+          <div className="mb-6 p-4 bg-rose-50 border border-rose-100 rounded-2xl flex items-center space-x-3 text-rose-600 text-sm font-medium">
+            <AlertCircle size={18} />
+            <span>{error}</span>
           </div>
-          <h3 className="text-xl font-bold text-slate-800 mb-2">Drop your resume here</h3>
-          <p className="text-slate-500 mb-8">Supports PDF, DOCX up to 10MB</p>
-          <button className="bg-slate-900 text-white px-8 py-3 rounded-xl font-medium hover:bg-slate-800 transition-all shadow-lg">
-            Select File
-          </button>
+        )}
+
+        <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-8">
+          <div className="space-y-4">
+            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Resume Content</label>
+            <textarea
+              rows={12}
+              className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-sage-500/20 focus:border-sage-500 transition-all resize-none font-mono"
+              placeholder="Paste your resume text here (Experience, Skills, Projects...)"
+              value={resumeText}
+              onChange={(e) => setResumeText(e.target.value)}
+            />
+            <button 
+              onClick={handleAnalyze}
+              disabled={!resumeText.trim() || isUploading}
+              className="w-full bg-sage-600 text-white py-4 rounded-xl font-semibold hover:bg-sage-700 transition-all shadow-lg shadow-sage-100 flex items-center justify-center space-x-2 disabled:opacity-50"
+            >
+              <Zap size={18} />
+              <span>Analyze with AI</span>
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -162,160 +244,315 @@ export default function StudentDashboard() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
         <div>
           <div className="flex items-center space-x-3 mb-2">
             <h1 className="text-3xl font-display font-bold text-slate-900">{resumeData.name}</h1>
-            <span className="px-2 py-0.5 bg-sage-100 text-sage-700 text-[10px] font-bold uppercase tracking-wider rounded">Senior Level</span>
+            <span className="px-2 py-0.5 bg-sage-100 text-sage-700 text-[10px] font-bold uppercase tracking-wider rounded">Candidate</span>
           </div>
           <p className="text-slate-500 flex items-center space-x-2">
             <span>{resumeData.email}</span>
             <span className="w-1 h-1 bg-slate-300 rounded-full" />
-            <span>Career Analysis Report</span>
+            <span>AI Career Analysis</span>
           </p>
         </div>
         <div className="flex items-center space-x-3">
-          <button className="flex items-center space-x-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors">
-            <Download size={16} />
-            <span>Export PDF</span>
-          </button>
           <button 
             onClick={() => setResumeData(null)}
-            className="px-4 py-2 bg-sage-600 text-white rounded-lg text-sm font-medium hover:bg-sage-700 transition-colors shadow-sm"
+            className="px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors"
           >
-            New Analysis
+            Reset Analysis
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-        {/* Main Score Card */}
-        <div className="md:col-span-4 bento-card flex flex-col items-center justify-center text-center">
-          <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-8">Overall Market Fit</h3>
-          <div className="relative w-48 h-48 mb-6">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={[{ value: resumeData.scores?.fit || 0 }, { value: 100 - (resumeData.scores?.fit || 0) }]}
-                  innerRadius={70}
-                  outerRadius={90}
-                  startAngle={90}
-                  endAngle={450}
-                  paddingAngle={0}
-                  dataKey="value"
-                >
-                  <Cell fill="#5d7c5d" />
-                  <Cell fill="#f1f5f9" />
-                </Pie>
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-5xl font-display font-bold text-slate-900">{resumeData.scores?.fit}%</span>
-              <span className="text-xs font-bold text-sage-600 mt-1 flex items-center">
-                <TrendingUp size={12} className="mr-1" />
-                +4% vs last month
-              </span>
-            </div>
-          </div>
-          <p className="text-slate-500 text-sm leading-relaxed">
-            Your profile shows exceptional alignment with current market demands in the fintech sector.
-          </p>
-        </div>
+      {/* Tabs */}
+      <div className="flex items-center space-x-1 bg-slate-100 p-1 rounded-xl w-fit mb-8">
+        <button
+          onClick={() => setActiveTab('analysis')}
+          className={`px-6 py-2 rounded-lg text-sm font-medium transition-all ${
+            activeTab === 'analysis' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+          }`}
+        >
+          My Analysis
+        </button>
+        <button
+          onClick={() => setActiveTab('jobs')}
+          className={`px-6 py-2 rounded-lg text-sm font-medium transition-all ${
+            activeTab === 'jobs' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+          }`}
+        >
+          Job Market
+        </button>
+      </div>
 
-        {/* Radar Chart Card */}
-        <div className="md:col-span-5 bento-card">
-          <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-6">Competency Matrix</h3>
-          <div className="h-64 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <RadarChart cx="50%" cy="50%" outerRadius="80%" data={scoreData}>
-                <PolarGrid stroke="#e2e8f0" />
-                <PolarAngleAxis dataKey="subject" tick={{ fill: '#64748b', fontSize: 10, fontWeight: 500 }} />
-                <Radar
-                  name="Score"
-                  dataKey="A"
-                  stroke="#5d7c5d"
-                  fill="#5d7c5d"
-                  fillOpacity={0.2}
+      <AnimatePresence mode="wait">
+        {activeTab === 'analysis' ? (
+          <motion.div
+            key="analysis"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="grid grid-cols-1 md:grid-cols-12 gap-6"
+          >
+            {/* Main Score Card */}
+            <div className="md:col-span-4 bento-card flex flex-col items-center justify-center text-center">
+              <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-8">Overall Market Fit</h3>
+              <div className="relative w-48 h-48 mb-6">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={[{ value: resumeData.scores?.fit || 0 }, { value: 100 - (resumeData.scores?.fit || 0) }]}
+                      innerRadius={70}
+                      outerRadius={90}
+                      startAngle={90}
+                      endAngle={450}
+                      paddingAngle={0}
+                      dataKey="value"
+                    >
+                      <Cell fill="#5d7c5d" />
+                      <Cell fill="#f1f5f9" />
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="text-5xl font-display font-bold text-slate-900">{resumeData.scores?.fit}%</span>
+                </div>
+              </div>
+              <p className="text-slate-500 text-sm leading-relaxed">
+                Your profile shows strong alignment with current market demands.
+              </p>
+            </div>
+
+            {/* Radar Chart Card */}
+            <div className="md:col-span-5 bento-card">
+              <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-6">Competency Matrix</h3>
+              <div className="h-64 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RadarChart cx="50%" cy="50%" outerRadius="80%" data={scoreData}>
+                    <PolarGrid stroke="#e2e8f0" />
+                    <PolarAngleAxis dataKey="subject" tick={{ fill: '#64748b', fontSize: 10, fontWeight: 500 }} />
+                    <Radar
+                      name="Score"
+                      dataKey="A"
+                      stroke="#5d7c5d"
+                      fill="#5d7c5d"
+                      fillOpacity={0.2}
+                    />
+                  </RadarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Quick Stats */}
+            <div className="md:col-span-3 grid grid-rows-2 gap-6">
+              <div className="bento-card flex flex-col justify-between">
+                <div className="flex items-center justify-between">
+                  <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+                    <ShieldCheck size={20} />
+                  </div>
+                  <span className="text-xs font-bold text-blue-600">High</span>
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-slate-800">Authenticity</h4>
+                  <p className="text-2xl font-display font-bold text-slate-900">{resumeData.scores?.authenticity}%</p>
+                </div>
+              </div>
+              <div className="bento-card flex flex-col justify-between">
+                <div className="flex items-center justify-between">
+                  <div className="p-2 bg-amber-50 text-amber-600 rounded-lg">
+                    <AlertCircle size={20} />
+                  </div>
+                  <span className="text-xs font-bold text-amber-600">Moderate</span>
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-slate-800">Impact Score</h4>
+                  <p className="text-2xl font-display font-bold text-slate-900">{resumeData.scores?.impact}%</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Skills Bento */}
+            <div className="md:col-span-8 bento-card">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest">Skill Clusters</h3>
+                <Layers size={16} className="text-slate-300" />
+              </div>
+              <div className="flex flex-wrap gap-3">
+                {resumeData.skills.map((skill, i) => (
+                  <div key={i} className="px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl flex items-center space-x-2 group hover:border-sage-300 transition-colors">
+                    <span className="text-sm font-medium text-slate-700">{skill}</span>
+                    <span className="w-1.5 h-1.5 bg-sage-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Insights Bento */}
+            <div className="md:col-span-4 bento-card bg-slate-900 text-white border-none">
+              <h3 className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-6">AI Summary</h3>
+              <div className="mb-6">
+                <p className="text-sm text-slate-300 leading-relaxed italic">
+                  "{resumeData.summary}"
+                </p>
+              </div>
+              <button className="w-full mt-8 py-3 bg-white/10 hover:bg-white/20 rounded-xl text-sm font-medium transition-colors flex items-center justify-center space-x-2">
+                <span>View Full Roadmap</span>
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="jobs"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="space-y-6"
+          >
+            {/* Search Bar */}
+            <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="relative">
+                <Target className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                <input
+                  type="text"
+                  placeholder="Keywords (e.g. React, AI)"
+                  className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sage-500/20 focus:border-sage-500 transition-all"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                 />
-              </RadarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+              </div>
+              <div className="relative">
+                <Layers className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                <input
+                  type="text"
+                  placeholder="Location"
+                  className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sage-500/20 focus:border-sage-500 transition-all"
+                  value={locationQuery}
+                  onChange={(e) => setLocationQuery(e.target.value)}
+                />
+              </div>
+              <div className="relative">
+                <Briefcase className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                <input
+                  type="text"
+                  placeholder="Company"
+                  className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sage-500/20 focus:border-sage-500 transition-all"
+                  value={companyQuery}
+                  onChange={(e) => setCompanyQuery(e.target.value)}
+                />
+              </div>
+            </div>
 
-        {/* Quick Stats */}
-        <div className="md:col-span-3 grid grid-rows-2 gap-6">
-          <div className="bento-card flex flex-col justify-between">
-            <div className="flex items-center justify-between">
-              <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
-                <ShieldCheck size={20} />
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="md:col-span-2 space-y-4">
+                {filteredJobs.length > 0 ? (
+                  filteredJobs.map((job) => (
+                  <div 
+                    key={job.id}
+                    className={`p-6 bg-white rounded-3xl border transition-all cursor-pointer ${
+                      selectedJob?.id === job.id ? 'border-sage-500 ring-4 ring-sage-500/5' : 'border-slate-100 hover:border-sage-200'
+                    }`}
+                    onClick={() => handleMatchJob(job)}
+                  >
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center space-x-4">
+                        <img src={job.logo} alt={job.company} className="w-12 h-12 rounded-xl object-cover" />
+                        <div>
+                          <h4 className="font-bold text-slate-900">{job.title}</h4>
+                          <p className="text-sm text-slate-500">{job.company} • {job.location}</p>
+                        </div>
+                      </div>
+                      <span className="text-sm font-bold text-sage-600">{job.salary}</span>
+                    </div>
+                    <p className="text-sm text-slate-600 line-clamp-2 mb-4">
+                      {job.description}
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <span className="px-2 py-1 bg-slate-100 rounded text-[10px] font-bold text-slate-500 uppercase">Full Time</span>
+                        <span className="px-2 py-1 bg-slate-100 rounded text-[10px] font-bold text-slate-500 uppercase">Remote Friendly</span>
+                      </div>
+                      <button className="text-sm font-bold text-sage-600 hover:text-sage-700 flex items-center space-x-1">
+                        <span>Analyze Match</span>
+                        <ChevronRight size={16} />
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="bg-white p-12 rounded-3xl border border-slate-100 text-center">
+                  <p className="text-slate-500">No jobs found matching your criteria.</p>
+                </div>
+              )}
               </div>
-              <span className="text-xs font-bold text-blue-600">High</span>
-            </div>
-            <div>
-              <h4 className="text-sm font-bold text-slate-800">Authenticity</h4>
-              <p className="text-2xl font-display font-bold text-slate-900">{resumeData.scores?.authenticity}%</p>
-            </div>
-          </div>
-          <div className="bento-card flex flex-col justify-between">
-            <div className="flex items-center justify-between">
-              <div className="p-2 bg-amber-50 text-amber-600 rounded-lg">
-                <AlertCircle size={20} />
-              </div>
-              <span className="text-xs font-bold text-amber-600">Moderate</span>
-            </div>
-            <div>
-              <h4 className="text-sm font-bold text-slate-800">Impact Score</h4>
-              <p className="text-2xl font-display font-bold text-slate-900">{resumeData.scores?.impact}%</p>
-            </div>
-          </div>
-        </div>
 
-        {/* Skills Bento */}
-        <div className="md:col-span-8 bento-card">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest">Skill Clusters</h3>
-            <Layers size={16} className="text-slate-300" />
-          </div>
-          <div className="flex flex-wrap gap-3">
-            {resumeData.skills.map((skill, i) => (
-              <div key={i} className="px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl flex items-center space-x-2 group hover:border-sage-300 transition-colors">
-                <span className="text-sm font-medium text-slate-700">{skill}</span>
-                <span className="w-1.5 h-1.5 bg-sage-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
-            ))}
-            <div className="px-4 py-2 border border-dashed border-slate-200 rounded-xl text-sm font-medium text-slate-400 hover:border-sage-300 hover:text-sage-500 cursor-pointer transition-colors">
-              + Add Skill
-            </div>
-          </div>
-        </div>
+              <div className="md:col-span-1">
+                <div className="sticky top-24 bento-card min-h-[400px]">
+                  {isMatching ? (
+                    <div className="h-full flex flex-col items-center justify-center text-center py-12">
+                      <div className="w-12 h-12 border-4 border-sage-100 border-t-sage-500 rounded-full animate-spin mb-4" />
+                      <p className="text-slate-500 font-medium">AI is calculating your match probability...</p>
+                    </div>
+                  ) : matchResult ? (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="space-y-6"
+                    >
+                      <div className="text-center">
+                        <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Match Probability</h3>
+                        <div className="text-5xl font-display font-bold text-sage-600 mb-2">{matchResult.matchProbability}%</div>
+                        <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                          <motion.div 
+                            className="h-full bg-sage-500"
+                            initial={{ width: 0 }}
+                            animate={{ width: `${matchResult.matchProbability}%` }}
+                          />
+                        </div>
+                      </div>
 
-        {/* Insights Bento */}
-        <div className="md:col-span-4 bento-card bg-slate-900 text-white border-none">
-          <h3 className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-6">AI Insights</h3>
-          <ul className="space-y-4">
-            <li className="flex items-start space-x-3">
-              <div className="mt-1 p-1 bg-sage-500/20 text-sage-400 rounded">
-                <Target size={14} />
+                      <div className="space-y-4">
+                        <h4 className="text-sm font-bold text-slate-800">AI Analysis</h4>
+                        <p className="text-sm text-slate-600 leading-relaxed">
+                          {matchResult.explanation}
+                        </p>
+                      </div>
+
+                      {matchResult.missingSkills?.length > 0 && (
+                        <div className="space-y-3">
+                          <h4 className="text-sm font-bold text-slate-800">Skills to Acquire</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {matchResult.missingSkills.map((skill: string, i: number) => (
+                              <span key={i} className="px-2 py-1 bg-rose-50 text-rose-600 text-[10px] font-bold rounded uppercase">
+                                {skill}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      <button className="w-full bg-slate-900 text-white py-3 rounded-xl font-bold hover:bg-slate-800 transition-all shadow-lg mt-4">
+                        Apply Now
+                      </button>
+                    </motion.div>
+                  ) : (
+                    <div className="h-full flex flex-col items-center justify-center text-center py-12">
+                      <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center text-slate-300 mb-4">
+                        <Target size={32} />
+                      </div>
+                      <h4 className="font-bold text-slate-800 mb-2">Select a Job</h4>
+                      <p className="text-sm text-slate-500">
+                        Click on a job to see how well your profile matches the requirements.
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
-              <p className="text-sm text-slate-300 leading-relaxed">
-                Strengthen your <span className="text-white font-medium">Impact Score</span> by quantifying achievements in your SaaS experience.
-              </p>
-            </li>
-            <li className="flex items-start space-x-3">
-              <div className="mt-1 p-1 bg-sage-500/20 text-sage-400 rounded">
-                <Target size={14} />
-              </div>
-              <p className="text-sm text-slate-300 leading-relaxed">
-                Your <span className="text-white font-medium">System Design</span> skills are in the top 5% of candidates for Lead roles.
-              </p>
-            </li>
-          </ul>
-          <button className="w-full mt-8 py-3 bg-white/10 hover:bg-white/20 rounded-xl text-sm font-medium transition-colors flex items-center justify-center space-x-2">
-            <span>View Full Roadmap</span>
-            <ChevronRight size={16} />
-          </button>
-        </div>
-      </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

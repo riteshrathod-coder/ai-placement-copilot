@@ -68,26 +68,21 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 overflow-hidden">
-        <div className="absolute top-[20%] left-[-10%] w-[40%] h-[40%] bg-sage-100/30 rounded-full blur-3xl" />
-        <div className="absolute bottom-[20%] right-[-10%] w-[40%] h-[40%] bg-slate-100/30 rounded-full blur-3xl" />
-      </div>
-
+    <div className="min-h-[80vh] flex items-center justify-center px-4 py-12 relative z-10">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md"
       >
-        <div className="bg-white rounded-3xl shadow-xl border border-slate-100 p-8 md:p-10">
+        <div className="glass rounded-3xl p-8 md:p-10">
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-12 h-12 bg-sage-100 rounded-xl text-sage-600 mb-4">
+            <div className="inline-flex items-center justify-center w-12 h-12 bg-sage-500/10 rounded-xl text-sage-400 mb-4 border border-sage-500/20">
               {isSignUp ? <Sparkles size={24} /> : <ShieldCheck size={24} />}
             </div>
-            <h1 className="text-2xl font-display font-bold text-slate-900">
+            <h1 className="text-2xl font-display font-bold text-white">
               {isSignUp ? 'Create an Account' : 'Welcome Back'}
             </h1>
-            <p className="text-slate-500 text-sm mt-2">
+            <p className="text-slate-400 text-sm mt-2">
               {isSignUp 
                 ? 'Join AI Placement Copilot and elevate your career flow.' 
                 : 'Sign in to continue your professional journey.'}
@@ -98,7 +93,7 @@ export default function Auth() {
             <motion.div 
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-6 p-4 bg-rose-50 border border-rose-100 rounded-2xl flex items-center space-x-3 text-rose-600 text-sm font-medium"
+              className="mb-6 p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex items-center space-x-3 text-rose-400 text-sm font-medium"
             >
               <AlertCircle size={18} />
               <span>{error}</span>
@@ -107,7 +102,7 @@ export default function Auth() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-3">
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">
                 {isSignUp ? 'Select Your Role' : 'Sign in as'}
               </label>
               <div className="grid grid-cols-2 gap-4">
@@ -116,17 +111,17 @@ export default function Auth() {
                   onClick={() => setRole('student')}
                   className={`relative p-4 rounded-2xl border-2 text-left transition-all duration-300 ${
                     role === 'student'
-                      ? 'border-sage-500 bg-sage-50/50 ring-4 ring-sage-500/10'
-                      : 'border-slate-100 bg-white hover:border-sage-200 hover:bg-slate-50'
+                      ? 'border-sage-500 bg-sage-500/10 ring-4 ring-sage-500/10'
+                      : 'border-white/5 bg-white/5 hover:border-white/20 hover:bg-white/10'
                   }`}
                 >
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 transition-colors ${
-                    role === 'student' ? 'bg-sage-500 text-white' : 'bg-slate-100 text-slate-400'
+                    role === 'student' ? 'bg-sage-500 text-white' : 'bg-white/10 text-slate-400'
                   }`}>
                     <User size={20} />
                   </div>
-                  <div className="font-bold text-sm text-slate-900">Candidate</div>
-                  <div className="text-[10px] text-slate-500 mt-1 leading-tight">Apply for jobs & analyze resume</div>
+                  <div className="font-bold text-sm text-white">Candidate</div>
+                  <div className="text-[10px] text-slate-400 mt-1 leading-tight">Apply for jobs & analyze resume</div>
                   {role === 'student' && (
                     <motion.div 
                       layoutId="activeRole"
@@ -142,17 +137,17 @@ export default function Auth() {
                   onClick={() => setRole('hr')}
                   className={`relative p-4 rounded-2xl border-2 text-left transition-all duration-300 ${
                     role === 'hr'
-                      ? 'border-sage-500 bg-sage-50/50 ring-4 ring-sage-500/10'
-                      : 'border-slate-100 bg-white hover:border-sage-200 hover:bg-slate-50'
+                      ? 'border-sage-500 bg-sage-500/10 ring-4 ring-sage-500/10'
+                      : 'border-white/5 bg-white/5 hover:border-white/20 hover:bg-white/10'
                   }`}
                 >
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 transition-colors ${
-                    role === 'hr' ? 'bg-sage-500 text-white' : 'bg-slate-100 text-slate-400'
+                    role === 'hr' ? 'bg-sage-500 text-white' : 'bg-white/10 text-slate-400'
                   }`}>
                     <Briefcase size={20} />
                   </div>
-                  <div className="font-bold text-sm text-slate-900">HR Pro</div>
-                  <div className="text-[10px] text-slate-500 mt-1 leading-tight">Manage talent & view insights</div>
+                  <div className="font-bold text-sm text-white">HR Pro</div>
+                  <div className="text-[10px] text-slate-400 mt-1 leading-tight">Manage talent & view insights</div>
                   {role === 'hr' && (
                     <motion.div 
                       layoutId="activeRole"
@@ -167,14 +162,14 @@ export default function Auth() {
 
             <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Email Address</label>
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Email Address</label>
                 <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
                   <input
                     type="email"
                     required
                     placeholder="name@company.com"
-                    className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sage-500/20 focus:border-sage-500 transition-all"
+                    className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-sage-500/20 focus:border-sage-500 transition-all"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
@@ -183,20 +178,20 @@ export default function Auth() {
 
               <div className="space-y-2">
                 <div className="flex justify-between items-center ml-1">
-                  <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Password</label>
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Password</label>
                   {!isSignUp && (
-                    <button type="button" className="text-[10px] font-bold text-sage-600 hover:text-sage-700 uppercase tracking-wider">
+                    <button type="button" className="text-[10px] font-bold text-sage-400 hover:text-sage-300 uppercase tracking-wider">
                       Forgot?
                     </button>
                   )}
                 </div>
                 <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
                   <input
                     type="password"
                     required
                     placeholder="••••••••"
-                    className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sage-500/20 focus:border-sage-500 transition-all"
+                    className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-sage-500/20 focus:border-sage-500 transition-all"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                   />
@@ -205,14 +200,14 @@ export default function Auth() {
 
               {isSignUp && (
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Confirm Password</label>
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Confirm Password</label>
                   <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
                     <input
                       type="password"
                       required
                       placeholder="••••••••"
-                      className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sage-500/20 focus:border-sage-500 transition-all"
+                      className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-sage-500/20 focus:border-sage-500 transition-all"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                     />
@@ -224,7 +219,7 @@ export default function Auth() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-sage-600 text-white py-4 rounded-xl font-semibold hover:bg-sage-700 transition-all shadow-lg shadow-sage-100 flex items-center justify-center space-x-2 disabled:opacity-70 group"
+              className="w-full bg-sage-600 text-white py-4 rounded-xl font-semibold hover:bg-sage-700 transition-all shadow-lg shadow-sage-500/20 flex items-center justify-center space-x-2 disabled:opacity-70 group"
             >
               {isLoading ? (
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -237,12 +232,12 @@ export default function Auth() {
             </button>
           </form>
 
-          <div className="mt-8 pt-8 border-t border-slate-100 text-center">
-            <p className="text-sm text-slate-500">
+          <div className="mt-8 pt-8 border-t border-white/10 text-center">
+            <p className="text-sm text-slate-400">
               {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
               <Link 
                 to={isSignUp ? '/signin' : '/signup'} 
-                className="font-bold text-sage-600 hover:text-sage-700 transition-colors"
+                className="font-bold text-sage-400 hover:text-sage-300 transition-colors"
               >
                 {isSignUp ? 'Sign In' : 'Sign Up'}
               </Link>

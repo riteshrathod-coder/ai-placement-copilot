@@ -260,44 +260,44 @@ export default function StudentDashboard() {
 
   if (!resumeData) {
     return (
-      <div className="max-w-5xl mx-auto px-4 py-12">
+      <div className="max-w-5xl mx-auto px-4 py-12 relative z-10">
         <div className="mb-12">
-          <h1 className="text-3xl font-display font-bold text-slate-900 mb-2">Welcome Back</h1>
-          <p className="text-slate-500">Upload your resume file or paste your resume text below to get a comprehensive AI analysis of your career flow.</p>
+          <h1 className="text-3xl font-display font-bold text-white mb-2">Welcome Back</h1>
+          <p className="text-slate-400">Upload your resume file or paste your resume text below to get a comprehensive AI analysis of your career flow.</p>
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-rose-50 border border-rose-100 rounded-2xl flex items-center space-x-3 text-rose-600 text-sm font-medium">
+          <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex items-center space-x-3 text-rose-400 text-sm font-medium">
             <AlertCircle size={18} />
             <span>{error}</span>
           </div>
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-8 flex flex-col items-center justify-center text-center">
-            <div className="w-16 h-16 bg-sage-50 rounded-2xl flex items-center justify-center text-sage-600 mb-6">
+          <div className="bento-card flex flex-col items-center justify-center text-center">
+            <div className="w-16 h-16 bg-sage-500/10 rounded-2xl flex items-center justify-center text-sage-400 mb-6">
               <FileUp size={32} />
             </div>
-            <h3 className="text-xl font-bold text-slate-900 mb-2">Upload Resume</h3>
-            <p className="text-slate-500 text-sm mb-8">Support PDF, DOCX, or TXT files up to 5MB.</p>
+            <h3 className="text-xl font-bold text-white mb-2">Upload Resume</h3>
+            <p className="text-slate-400 text-sm mb-8">Support PDF, DOCX, or TXT files up to 5MB.</p>
             
             <label className="w-full cursor-pointer">
-              <div className={`w-full py-12 border-2 border-dashed rounded-2xl transition-all ${uploadedFile ? 'border-sage-500 bg-sage-50' : 'border-slate-200 hover:border-sage-300 hover:bg-slate-50'}`}>
+              <div className={`w-full py-12 border-2 border-dashed rounded-2xl transition-all ${uploadedFile ? 'border-sage-500 bg-sage-500/5' : 'border-white/10 hover:border-sage-500/50 hover:bg-white/5'}`}>
                 {uploadedFile ? (
                   <div className="flex flex-col items-center">
                     <CheckCircle2 className="text-sage-500 mb-2" size={24} />
-                    <span className="text-sm font-medium text-slate-900">{uploadedFile.name}</span>
+                    <span className="text-sm font-medium text-white">{uploadedFile.name}</span>
                     <button 
                       onClick={(e) => { e.preventDefault(); setUploadedFile(null); }}
-                      className="mt-2 text-xs text-rose-500 hover:underline"
+                      className="mt-2 text-xs text-rose-400 hover:underline"
                     >
                       Remove file
                     </button>
                   </div>
                 ) : (
                   <div className="flex flex-col items-center">
-                    <span className="text-sm font-medium text-slate-600">Click to select or drag and drop</span>
-                    <span className="text-xs text-slate-400 mt-1">Max file size 5MB</span>
+                    <span className="text-sm font-medium text-slate-300">Click to select or drag and drop</span>
+                    <span className="text-xs text-slate-500 mt-1">Max file size 5MB</span>
                   </div>
                 )}
               </div>
@@ -310,11 +310,11 @@ export default function StudentDashboard() {
             </label>
           </div>
 
-          <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-8">
+          <div className="bento-card">
             <div className="space-y-4 h-full flex flex-col">
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Or Paste Resume Text</label>
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Or Paste Resume Text</label>
               <textarea
-                className="flex-grow w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-sage-500/20 focus:border-sage-500 transition-all resize-none font-mono"
+                className="flex-grow w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-sage-500/20 focus:border-sage-500 transition-all resize-none font-mono"
                 placeholder="Paste your resume text here..."
                 value={resumeText}
                 onChange={(e) => { setResumeText(e.target.value); setUploadedFile(null); }}
@@ -347,22 +347,22 @@ export default function StudentDashboard() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 relative z-10">
         <div>
           <div className="flex items-center space-x-3 mb-2">
-            <h1 className="text-3xl font-display font-bold text-slate-900">{resumeData.name}</h1>
-            <span className="px-2 py-0.5 bg-sage-100 text-sage-700 text-[10px] font-bold uppercase tracking-wider rounded">Candidate</span>
+            <h1 className="text-3xl font-display font-bold text-white">{resumeData.name}</h1>
+            <span className="px-2 py-0.5 bg-sage-500/20 text-sage-400 text-[10px] font-bold uppercase tracking-wider rounded border border-sage-500/30">Candidate</span>
           </div>
-          <p className="text-slate-500 flex items-center space-x-2">
+          <p className="text-slate-400 flex items-center space-x-2">
             <span>{resumeData.email}</span>
-            <span className="w-1 h-1 bg-slate-300 rounded-full" />
+            <span className="w-1 h-1 bg-slate-700 rounded-full" />
             <span>AI Career Analysis</span>
           </p>
         </div>
         <div className="flex items-center space-x-3">
           <button 
             onClick={() => setResumeData(null)}
-            className="px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors"
+            className="px-4 py-2 bg-white/5 border border-white/10 text-slate-300 rounded-lg text-sm font-medium hover:bg-white/10 transition-colors"
           >
             Reset Analysis
           </button>
@@ -370,11 +370,11 @@ export default function StudentDashboard() {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center space-x-1 bg-slate-100 p-1 rounded-xl w-fit mb-8">
+      <div className="flex items-center space-x-1 bg-white/5 p-1 rounded-xl w-fit mb-8 relative z-10">
         <button
           onClick={() => setActiveTab('analysis')}
           className={`px-6 py-2 rounded-lg text-sm font-medium transition-all ${
-            activeTab === 'analysis' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+            activeTab === 'analysis' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-200'
           }`}
         >
           My Analysis
@@ -382,7 +382,7 @@ export default function StudentDashboard() {
         <button
           onClick={() => setActiveTab('jobs')}
           className={`px-6 py-2 rounded-lg text-sm font-medium transition-all ${
-            activeTab === 'jobs' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+            activeTab === 'jobs' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-200'
           }`}
         >
           Job Market
@@ -584,47 +584,47 @@ export default function StudentDashboard() {
             className="space-y-6"
           >
             {/* Search Bar */}
-            <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="glass p-6 rounded-3xl grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="relative">
-                <Target className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                <Target className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
                 <input
                   type="text"
                   placeholder="Keywords (e.g. React, AI)"
-                  className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sage-500/20 focus:border-sage-500 transition-all"
+                  className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-sage-500/20 focus:border-sage-500 transition-all"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
               <div className="relative">
-                <Layers className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                <Layers className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
                 <select
-                  className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sage-500/20 focus:border-sage-500 transition-all appearance-none"
+                  className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-sage-500/20 focus:border-sage-500 transition-all appearance-none"
                   value={locationFilter}
                   onChange={(e) => setLocationFilter(e.target.value)}
                 >
                   {locations.map(loc => (
-                    <option key={loc} value={loc}>{loc === 'All' ? 'All Locations' : loc}</option>
+                    <option key={loc} value={loc} className="bg-slate-900">{loc === 'All' ? 'All Locations' : loc}</option>
                   ))}
                 </select>
               </div>
               <div className="relative">
-                <Briefcase className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                <Briefcase className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
                 <select
-                  className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sage-500/20 focus:border-sage-500 transition-all appearance-none"
+                  className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-sage-500/20 focus:border-sage-500 transition-all appearance-none"
                   value={jobTypeFilter}
                   onChange={(e) => setJobTypeFilter(e.target.value)}
                 >
                   {jobTypes.map(type => (
-                    <option key={type} value={type}>{type === 'All' ? 'All Job Types' : type}</option>
+                    <option key={type} value={type} className="bg-slate-900">{type === 'All' ? 'All Job Types' : type}</option>
                   ))}
                 </select>
               </div>
               <div className="relative">
-                <Send className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                <Send className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
                 <input
                   type="text"
                   placeholder="Company"
-                  className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sage-500/20 focus:border-sage-500 transition-all"
+                  className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-sage-500/20 focus:border-sage-500 transition-all"
                   value={companyQuery}
                   onChange={(e) => setCompanyQuery(e.target.value)}
                 />
@@ -637,8 +637,8 @@ export default function StudentDashboard() {
                   filteredJobs.map((job) => (
                   <div 
                     key={job.id}
-                    className={`p-6 bg-white rounded-3xl border transition-all cursor-pointer ${
-                      selectedJob?.id === job.id ? 'border-sage-500 ring-4 ring-sage-500/5' : 'border-slate-100 hover:border-sage-200'
+                    className={`p-6 bento-card transition-all cursor-pointer ${
+                      selectedJob?.id === job.id ? 'border-sage-500 ring-4 ring-sage-500/10' : ''
                     }`}
                     onClick={() => handleMatchJob(job)}
                   >
@@ -646,21 +646,21 @@ export default function StudentDashboard() {
                       <div className="flex items-center space-x-4">
                         <img src={job.logo} alt={job.company} className="w-12 h-12 rounded-xl object-cover" />
                         <div>
-                          <h4 className="font-bold text-slate-900">{job.title}</h4>
-                          <p className="text-sm text-slate-500">{job.company} • {job.location}</p>
+                          <h4 className="font-bold text-white">{job.title}</h4>
+                          <p className="text-sm text-slate-400">{job.company} • {job.location}</p>
                         </div>
                       </div>
-                      <span className="text-sm font-bold text-sage-600">{job.salary}</span>
+                      <span className="text-sm font-bold text-sage-400">{job.salary}</span>
                     </div>
-                    <p className="text-sm text-slate-600 line-clamp-2 mb-4">
+                    <p className="text-sm text-slate-300 line-clamp-2 mb-4">
                       {job.description}
                     </p>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
-                        <span className="px-2 py-1 bg-slate-100 rounded text-[10px] font-bold text-slate-500 uppercase">Full Time</span>
-                        <span className="px-2 py-1 bg-sage-50 rounded text-[10px] font-bold text-sage-600 uppercase">{job.type}</span>
+                        <span className="px-2 py-1 bg-white/5 rounded text-[10px] font-bold text-slate-400 uppercase">Full Time</span>
+                        <span className="px-2 py-1 bg-sage-500/10 rounded text-[10px] font-bold text-sage-400 uppercase">{job.type}</span>
                       </div>
-                      <button className="text-sm font-bold text-sage-600 hover:text-sage-700 flex items-center space-x-1">
+                      <button className="text-sm font-bold text-sage-400 hover:text-sage-300 flex items-center space-x-1">
                         <span>Analyze Match</span>
                         <ChevronRight size={16} />
                       </button>
@@ -668,8 +668,8 @@ export default function StudentDashboard() {
                   </div>
                 ))
               ) : (
-                <div className="bg-white p-12 rounded-3xl border border-slate-100 text-center">
-                  <p className="text-slate-500">No jobs found matching your criteria.</p>
+                <div className="bento-card text-center py-20">
+                  <p className="text-slate-400">No jobs found matching your criteria.</p>
                 </div>
               )}
               </div>

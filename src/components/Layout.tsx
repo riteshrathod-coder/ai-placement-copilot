@@ -5,6 +5,7 @@ import { LogOut, User, Briefcase, LayoutDashboard, FileText } from 'lucide-react
 import { motion } from 'motion/react';
 import { signOut } from 'firebase/auth';
 import { auth } from '../lib/firebase';
+import NeuralBackground from './NeuralBackground';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { userRole, setUserRole } = useAppContext();
@@ -24,8 +25,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const isPublic = location.pathname === '/';
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="sticky top-0 z-50 glass border-b border-slate-200">
+    <div className="min-h-screen flex flex-col relative overflow-hidden">
+      <NeuralBackground />
+      <header className="sticky top-0 z-50 glass border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-sage-500 rounded-lg flex items-center justify-center text-white font-bold">
@@ -105,7 +107,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <main className="flex-grow">
+      <main className="flex-grow relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -116,7 +118,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </motion.div>
       </main>
 
-      <footer className="bg-white border-t border-slate-200 py-8">
+      <footer className="bg-transparent border-t border-white/10 py-8 relative z-10">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <p className="text-sm text-slate-400">
             © 2026 AI Placement Copilot. All rights reserved.

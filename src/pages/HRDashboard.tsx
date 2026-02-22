@@ -41,24 +41,24 @@ export default function HRDashboard() {
   const branches = ['All', 'Engineering', 'Design', 'Marketing', 'Data'];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="max-w-7xl mx-auto px-4 py-8 relative z-10">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-2xl font-display font-bold text-slate-900">Candidate Pipeline</h1>
-          <p className="text-sm text-slate-500">Manage and analyze your active talent pool.</p>
+          <h1 className="text-2xl font-display font-bold text-white">Candidate Pipeline</h1>
+          <p className="text-sm text-slate-400">Manage and analyze your active talent pool.</p>
         </div>
         <div className="flex items-center space-x-3">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
             <input
               type="text"
               placeholder="Search candidates..."
-              className="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sage-500/20 focus:border-sage-500 transition-all w-full md:w-64"
+              className="pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-sage-500/20 focus:border-sage-500 transition-all w-full md:w-64"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <button className="flex items-center space-x-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+          <button className="flex items-center space-x-2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm font-medium text-slate-300 hover:bg-white/10 transition-colors">
             <Filter size={18} />
             <span>Filters</span>
           </button>
@@ -73,7 +73,7 @@ export default function HRDashboard() {
             className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
               selectedBranch === branch 
                 ? 'bg-sage-600 text-white shadow-sm' 
-                : 'bg-white text-slate-600 border border-slate-200 hover:border-sage-300'
+                : 'bg-white/5 text-slate-400 border border-white/10 hover:border-sage-500/50 hover:text-white'
             }`}
           >
             {branch}
@@ -81,50 +81,50 @@ export default function HRDashboard() {
         ))}
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+      <div className="glass rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-200">
-                <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Candidate</th>
-                <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Branch</th>
-                <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">AI Score</th>
-                <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Status</th>
-                <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest text-right">Actions</th>
+              <tr className="bg-white/5 border-b border-white/10">
+                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Candidate</th>
+                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Branch</th>
+                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">AI Score</th>
+                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Status</th>
+                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-white/5">
               {filteredCandidates.map((candidate) => (
                 <tr 
                   key={candidate.id} 
-                  className="hover:bg-slate-50/50 transition-colors cursor-pointer group"
+                  className="hover:bg-white/5 transition-colors cursor-pointer group"
                   onClick={() => setSelectedCandidate(candidate)}
                 >
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-sage-100 rounded-full flex items-center justify-center text-sage-700 font-bold">
+                      <div className="w-10 h-10 bg-sage-500/20 rounded-full flex items-center justify-center text-sage-400 font-bold border border-sage-500/30">
                         {candidate.name.charAt(0)}
                       </div>
                       <div>
-                        <div className="text-sm font-bold text-slate-900 group-hover:text-sage-600 transition-colors">{candidate.name}</div>
+                        <div className="text-sm font-bold text-white group-hover:text-sage-400 transition-colors">{candidate.name}</div>
                         <div className="text-xs text-slate-500">{candidate.role}</div>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="text-xs font-medium text-slate-600 px-2 py-1 bg-slate-100 rounded-md">
+                    <span className="text-xs font-medium text-slate-400 px-2 py-1 bg-white/5 rounded-md border border-white/10">
                       {candidate.branch}
                     </span>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-2">
-                      <div className="w-12 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                      <div className="w-12 h-1.5 bg-white/5 rounded-full overflow-hidden">
                         <div 
                           className={`h-full rounded-full ${candidate.score > 85 ? 'bg-sage-500' : candidate.score > 70 ? 'bg-amber-500' : 'bg-rose-500'}`}
                           style={{ width: `${candidate.score}%` }}
                         />
                       </div>
-                      <span className="text-sm font-bold text-slate-700">{candidate.score}</span>
+                      <span className="text-sm font-bold text-slate-300">{candidate.score}</span>
                     </div>
                   </td>
                   <td className="px-6 py-4">
@@ -134,11 +134,11 @@ export default function HRDashboard() {
                         candidate.status === 'Interviewing' ? 'bg-sage-500' :
                         candidate.status === 'Shortlisted' ? 'bg-amber-500' : 'bg-slate-400'
                       }`} />
-                      <span className="text-xs font-medium text-slate-600">{candidate.status}</span>
+                      <span className="text-xs font-medium text-slate-400">{candidate.status}</span>
                     </div>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <button className="p-2 text-slate-400 hover:text-slate-600 transition-colors">
+                    <button className="p-2 text-slate-500 hover:text-slate-300 transition-colors">
                       <MoreHorizontal size={18} />
                     </button>
                   </td>
@@ -158,35 +158,35 @@ export default function HRDashboard() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setSelectedCandidate(null)}
-              className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+              className="absolute inset-0 bg-slate-950/80 backdrop-blur-md"
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-6xl h-[90vh] bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col"
+              className="relative w-full max-w-6xl h-[90vh] bg-slate-900 rounded-3xl shadow-2xl overflow-hidden flex flex-col border border-white/10"
             >
               {/* Modal Header */}
-              <div className="px-8 py-4 border-b border-slate-100 flex items-center justify-between bg-white sticky top-0 z-10">
+              <div className="px-8 py-4 border-b border-white/10 flex items-center justify-between bg-slate-900 sticky top-0 z-10">
                 <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-sage-500 rounded-xl flex items-center justify-center text-white font-bold text-xl">
+                  <div className="w-12 h-12 bg-sage-500 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-sage-500/20">
                     {selectedCandidate.name.charAt(0)}
                   </div>
                   <div>
-                    <h2 className="text-xl font-display font-bold text-slate-900">{selectedCandidate.name}</h2>
-                    <p className="text-sm text-slate-500">{selectedCandidate.role}</p>
+                    <h2 className="text-xl font-display font-bold text-white">{selectedCandidate.name}</h2>
+                    <p className="text-sm text-slate-400">{selectedCandidate.role}</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
-                  <button className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+                  <button className="px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm font-medium text-slate-300 hover:bg-white/10 transition-colors">
                     Schedule Interview
                   </button>
-                  <button className="px-4 py-2 bg-sage-600 text-white rounded-lg text-sm font-medium hover:bg-sage-700 transition-colors shadow-sm">
+                  <button className="px-4 py-2 bg-sage-600 text-white rounded-lg text-sm font-medium hover:bg-sage-700 transition-colors shadow-lg shadow-sage-500/20">
                     Move to Next Stage
                   </button>
                   <button 
                     onClick={() => setSelectedCandidate(null)}
-                    className="p-2 text-slate-400 hover:text-slate-600 transition-colors"
+                    className="p-2 text-slate-500 hover:text-slate-300 transition-colors"
                   >
                     <XCircle size={24} />
                   </button>
@@ -196,14 +196,14 @@ export default function HRDashboard() {
               {/* Split Pane Content */}
               <div className="flex-grow flex overflow-hidden">
                 {/* Left Pane: Resume View */}
-                <div className="w-1/2 border-r border-slate-100 bg-slate-50 overflow-y-auto p-8">
-                  <div className="bg-white shadow-sm border border-slate-200 rounded-xl min-h-[1000px] p-12 relative">
-                    <div className="absolute top-8 right-8 text-slate-300">
+                <div className="w-1/2 border-r border-white/10 bg-slate-950/50 overflow-y-auto p-8">
+                  <div className="bg-slate-900 shadow-2xl border border-white/5 rounded-xl min-h-[1000px] p-12 relative">
+                    <div className="absolute top-8 right-8 text-slate-800">
                       <FileText size={48} />
                     </div>
                     <div className="mb-12">
-                      <h1 className="text-3xl font-bold text-slate-900 mb-2">{selectedCandidate.name}</h1>
-                      <div className="flex flex-wrap gap-4 text-sm text-slate-500">
+                      <h1 className="text-3xl font-bold text-white mb-2">{selectedCandidate.name}</h1>
+                      <div className="flex flex-wrap gap-4 text-sm text-slate-400">
                         <span className="flex items-center space-x-1"><Mail size={14} /> <span>alex.r@example.com</span></span>
                         <span className="flex items-center space-x-1"><MapPin size={14} /> <span>San Francisco, CA</span></span>
                         <span className="flex items-center space-x-1"><ExternalLink size={14} /> <span>portfolio.dev</span></span>
@@ -212,8 +212,8 @@ export default function HRDashboard() {
 
                     <div className="space-y-8">
                       <section>
-                        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 border-b border-slate-100 pb-2">Professional Summary</h3>
-                        <p className="text-sm text-slate-600 leading-relaxed">
+                        <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4 border-b border-white/5 pb-2">Professional Summary</h3>
+                        <p className="text-sm text-slate-300 leading-relaxed">
                           Results-oriented Senior Software Engineer with over 6 years of experience in building scalable web applications. 
                           Expertise in React, Node.js, and cloud architecture. Proven track record of leading cross-functional teams 
                           to deliver high-impact products in the fintech space.
@@ -221,15 +221,15 @@ export default function HRDashboard() {
                       </section>
 
                       <section>
-                        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 border-b border-slate-100 pb-2">Experience</h3>
+                        <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4 border-b border-white/5 pb-2">Experience</h3>
                         <div className="space-y-6">
                           <div>
                             <div className="flex justify-between items-start mb-1">
-                              <h4 className="text-sm font-bold text-slate-800">Senior Software Engineer</h4>
-                              <span className="text-xs font-medium text-slate-400">2021 — Present</span>
+                              <h4 className="text-sm font-bold text-slate-200">Senior Software Engineer</h4>
+                              <span className="text-xs font-medium text-slate-500">2021 — Present</span>
                             </div>
-                            <div className="text-xs font-bold text-sage-600 mb-2">FinTech Solutions Inc.</div>
-                            <ul className="text-xs text-slate-600 space-y-2 list-disc pl-4">
+                            <div className="text-xs font-bold text-sage-400 mb-2">FinTech Solutions Inc.</div>
+                            <ul className="text-xs text-slate-400 space-y-2 list-disc pl-4">
                               <li>Architected and implemented a real-time payment processing system handling $2M+ daily transactions.</li>
                               <li>Led a team of 5 developers to migrate legacy monolith to a microservices architecture.</li>
                               <li>Reduced system latency by 40% through optimized database queries and caching strategies.</li>
@@ -239,10 +239,10 @@ export default function HRDashboard() {
                       </section>
 
                       <section>
-                        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 border-b border-slate-100 pb-2">Skills</h3>
+                        <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4 border-b border-white/5 pb-2">Skills</h3>
                         <div className="flex flex-wrap gap-2">
                           {selectedCandidate.skills.map(skill => (
-                            <span key={skill} className="px-2 py-1 bg-slate-50 border border-slate-200 rounded text-[10px] font-bold text-slate-600 uppercase">
+                            <span key={skill} className="px-2 py-1 bg-white/5 border border-white/10 rounded text-[10px] font-bold text-slate-400 uppercase">
                               {skill}
                             </span>
                           ))}
@@ -253,30 +253,30 @@ export default function HRDashboard() {
                 </div>
 
                 {/* Right Pane: AI Insights */}
-                <div className="w-1/2 overflow-y-auto p-8 bg-white">
+                <div className="w-1/2 overflow-y-auto p-8 bg-slate-900">
                   <div className="space-y-8">
                     <div>
                       <div className="flex items-center space-x-2 mb-6">
                         <BrainCircuit className="text-sage-500" size={24} />
-                        <h3 className="text-lg font-display font-bold text-slate-900">AI Analysis Report</h3>
+                        <h3 className="text-lg font-display font-bold text-white">AI Analysis Report</h3>
                       </div>
 
                       <div className="grid grid-cols-2 gap-4 mb-8">
-                        <div className="p-4 bg-sage-50 rounded-2xl border border-sage-100">
-                          <div className="text-xs font-bold text-sage-600 uppercase tracking-wider mb-1">Market Fit</div>
-                          <div className="text-3xl font-display font-bold text-slate-900">{selectedCandidate.score}%</div>
+                        <div className="p-4 bg-sage-500/10 rounded-2xl border border-sage-500/20">
+                          <div className="text-xs font-bold text-sage-400 uppercase tracking-wider mb-1">Market Fit</div>
+                          <div className="text-3xl font-display font-bold text-white">{selectedCandidate.score}%</div>
                           <div className="text-[10px] text-sage-500 mt-1 font-medium">Top 5% of candidates</div>
                         </div>
-                        <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                          <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Authenticity</div>
-                          <div className="text-3xl font-display font-bold text-slate-900">94%</div>
+                        <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
+                          <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Authenticity</div>
+                          <div className="text-3xl font-display font-bold text-white">94%</div>
                           <div className="text-[10px] text-slate-400 mt-1 font-medium">Verified experience</div>
                         </div>
                       </div>
 
                       <div className="space-y-6">
                         <div>
-                          <h4 className="text-sm font-bold text-slate-800 mb-3 flex items-center space-x-2">
+                          <h4 className="text-sm font-bold text-slate-200 mb-3 flex items-center space-x-2">
                             <CheckCircle size={16} className="text-sage-500" />
                             <span>Key Strengths</span>
                           </h4>
@@ -286,7 +286,7 @@ export default function HRDashboard() {
                               "Quantifiable impact on business metrics (latency, transaction volume).",
                               "Deep expertise in modern frontend and backend stacks."
                             ].map((s, i) => (
-                              <li key={i} className="text-sm text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                              <li key={i} className="text-sm text-slate-400 bg-white/5 p-3 rounded-xl border border-white/10">
                                 {s}
                               </li>
                             ))}
@@ -294,19 +294,19 @@ export default function HRDashboard() {
                         </div>
 
                         <div>
-                          <h4 className="text-sm font-bold text-slate-800 mb-3 flex items-center space-x-2">
+                          <h4 className="text-sm font-bold text-slate-200 mb-3 flex items-center space-x-2">
                             <Clock size={16} className="text-amber-500" />
                             <span>Potential Gaps</span>
                           </h4>
                           <ul className="space-y-3">
-                            <li className="text-sm text-slate-600 bg-amber-50/30 p-3 rounded-xl border border-amber-100">
+                            <li className="text-sm text-slate-400 bg-amber-500/5 p-3 rounded-xl border border-amber-500/20">
                               Limited public contribution to open-source projects.
                             </li>
                           </ul>
                         </div>
 
                         <div>
-                          <h4 className="text-sm font-bold text-slate-800 mb-3 flex items-center space-x-2">
+                          <h4 className="text-sm font-bold text-slate-200 mb-3 flex items-center space-x-2">
                             <MessageSquare size={16} className="text-blue-500" />
                             <span>Interview Questions</span>
                           </h4>
@@ -316,7 +316,7 @@ export default function HRDashboard() {
                               "How do you approach mentoring junior developers in a high-pressure environment?",
                               "Describe a time when you had to make a difficult trade-off between performance and speed of delivery."
                             ].map((q, i) => (
-                              <div key={i} className="text-sm italic text-slate-600 border-l-2 border-slate-200 pl-4 py-1">
+                              <div key={i} className="text-sm italic text-slate-400 border-l-2 border-white/10 pl-4 py-1">
                                 "{q}"
                               </div>
                             ))}
